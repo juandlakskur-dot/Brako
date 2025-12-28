@@ -1,0 +1,1771 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+  <title>BRAKO - Sistema</title>
+
+  <style>
+    :root{
+      --bg1:#060615;
+      --bg2:#0c0d1f;
+      --panel:rgba(14,16,34,.74);
+      --border:rgba(255,45,85,.32);
+      --border2:rgba(255,45,85,.15);
+      --text:#F2F5FF;
+      --muted:#A7B0C6;
+      --neon:#ff2d55;
+      --neon2:#ff5c7a;
+      --ok:#2bffad;
+      --warn:#ffd54a;
+      --radius:18px;
+      --shadow:0 0 18px rgba(255,45,85,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 520px at 50% 0%, rgba(255,45,85,.12) 0%, rgba(0,0,0,0) 60%),
+        radial-gradient(800px 520px at 15% 25%, rgba(120,80,255,.10) 0%, rgba(0,0,0,0) 58%),
+        radial-gradient(800px 520px at 85% 30%, rgba(0,255,170,.05) 0%, rgba(0,0,0,0) 55%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
+    }
+
+    /* Particle canvas */
+    #fx{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      opacity:.55;
+      pointer-events:none;
+    }
+
+    .wrap{
+      position:relative;
+      z-index:2;
+      max-width:920px;
+      margin:0 auto;
+      padding:18px 14px 26px;
+    }
+
+    .brand{
+      text-align:center;
+      font-size:42px;
+      font-weight:1000;
+      letter-spacing:4px;
+      margin:14px 0 4px;
+      text-shadow:0 0 18px rgba(255,45,85,.55);
+    }
+    .sub{
+      text-align:center;
+      margin:0 0 16px;
+      color:var(--muted);
+      letter-spacing:5px;
+      font-size:12px;
+      opacity:.95;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin:10px 0 16px;
+    }
+    .tab{
+      padding:10px 16px;
+      border-radius:999px;
+      border:1px solid var(--border2);
+      background:rgba(10,12,25,.6);
+      color:var(--text);
+      font-weight:900;
+      letter-spacing:1px;
+      cursor:pointer;
+      box-shadow:0 0 0 rgba(0,0,0,0);
+      transition:.2s;
+    }
+    .tab.active{
+      border-color:rgba(255,45,85,.55);
+      box-shadow:0 0 14px rgba(255,45,85,.14);
+      background:rgba(255,45,85,.18);
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(8px);
+      margin-bottom:14px;
+    }
+    .title{
+      font-weight:1000;
+      letter-spacing:1px;
+      margin:0 0 12px;
+      font-size:16px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    @media(max-width:560px){ .grid{grid-template-columns:1fr} }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px;
+      letter-spacing:.6px;
+    }
+    select, input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,45,85,.25);
+      background:rgba(10,12,25,.9);
+      color:var(--text);
+      font-weight:900;
+      outline:none;
+    }
+    select:focus, input:focus{
+      border-color:rgba(255,45,85,.85);
+      box-shadow:0 0 0 3px rgba(255,45,85,.16);
+    }
+    .btn{
+      width:100%;
+      margin-top:14px;
+      padding:13px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,45,85,.25);
+      background:rgba(255,45,85,.95);
+      color:white;
+      font-weight:1000;
+      letter-spacing:1.4px;
+      cursor:pointer;
+      transition:.15s;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .btn:active{ transform:scale(.99); filter:brightness(.95); }
+    .btn.alt{
+      margin-top:10px;
+      background:transparent;
+      border:1px solid rgba(255,45,85,.55);
+      color:var(--text);
+    }
+    .btn.row{
+      margin-top:0;
+    }
+    .btn.green{
+      border-color:rgba(43,255,173,.35);
+      background:rgba(43,255,173,.18);
+      color:var(--text);
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,45,85,.35);
+      background:rgba(10,12,25,.55);
+      color:var(--muted);
+      font-size:12px;
+      margin-top:10px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:rgba(255,45,85,.9);
+      box-shadow:0 0 12px rgba(255,45,85,.55);
+    }
+    .hint{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .hidden{display:none!important}
+
+    .result-grid{
+      display:grid;
+      gap:8px;
+      margin-top:8px;
+    }
+    .kv{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 8px;
+      border-radius:12px;
+      background:rgba(10,12,25,.55);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .kv b{font-size:13px}
+    .kv span{
+      font-weight:1000;
+      color:var(--neon);
+      text-shadow:0 0 12px rgba(255,45,85,.35);
+      font-size:13px;
+    }
+
+    /* Calibrator UI */
+    .bigTap{
+      height:120px;
+      border-radius:16px;
+      border:1px solid rgba(255,45,85,.25);
+      background:rgba(10,12,25,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:1000;
+      letter-spacing:1px;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .stage{
+      position:relative;
+      height:240px;
+      border-radius:16px;
+      border:1px solid rgba(255,45,85,.25);
+      background:rgba(10,12,25,.55);
+      overflow:hidden;
+      touch-action:none;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .target{
+      position:absolute;
+      width:92px;
+      height:92px;
+      border-radius:50%;
+      border:2px solid rgba(255,45,85,.95);
+      box-shadow:0 0 18px rgba(255,45,85,.35);
+      left:calc(50% - 46px);
+      top:calc(50% - 46px);
+    }
+
+    pre{
+      white-space:pre-wrap;
+      word-break:break-word;
+      margin:0;
+      color:#EAF0FF;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;
+      line-height:1.32;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media(max-width:560px){ .actions{grid-template-columns:1fr} }
+
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background:rgba(255,45,85,.95);
+      color:white;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:1000;
+      letter-spacing:.6px;
+      opacity:0;
+      pointer-events:none;
+      transition:.25s;
+      z-index:99;
+      box-shadow:0 0 18px rgba(255,45,85,.18);
+    }
+    .toast.show{opacity:1}
+    
+    /* =========================
+   LOADER BRAKO
+   ========================= */
+.loader{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(900px 520px at 50% 0%, rgba(255,45,85,.16) 0%, rgba(0,0,0,0) 60%),
+    linear-gradient(180deg,#050510,#090a18);
+  transition: opacity .35s ease, transform .35s ease;
+}
+
+.loader.hide{
+  opacity:0;
+  transform:scale(1.02);
+  pointer-events:none;
+}
+
+.loaderBox{
+  width:min(420px, 92vw);
+  padding:18px 18px 16px;
+  border-radius:20px;
+  border:1px solid rgba(255,45,85,.35);
+  background:rgba(14,16,34,.78);
+  box-shadow: 0 0 24px rgba(255,45,85,.16);
+  backdrop-filter: blur(10px);
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+
+/* glow sweep */
+.loaderBox::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background: radial-gradient(600px 120px at 30% 0%, rgba(255,45,85,.28), rgba(0,0,0,0) 70%);
+  opacity:.75;
+  pointer-events:none;
+}
+
+.loaderTitle{
+  font-size:40px;
+  font-weight:1000;
+  letter-spacing:4px;
+  text-shadow:0 0 18px rgba(255,45,85,.55);
+  margin-top:4px;
+  animation: glitch 1.8s infinite;
+}
+
+.loaderSub{
+  margin-top:6px;
+  color:rgba(255,255,255,.75);
+  letter-spacing:3px;
+  font-size:12px;
+}
+
+.loaderRing{
+  width:64px;
+  height:64px;
+  margin:16px auto 14px;
+  border-radius:50%;
+  border:3px solid rgba(255,45,85,.25);
+  border-top-color: rgba(255,45,85,.95);
+  box-shadow: 0 0 18px rgba(255,45,85,.18);
+  animation: spin 0.9s linear infinite;
+}
+
+.loaderBar{
+  height:12px;
+  width:100%;
+  border-radius:999px;
+  border:1px solid rgba(255,45,85,.25);
+  background: rgba(10,12,25,.55);
+  overflow:hidden;
+  margin:0 auto;
+}
+
+.loaderFill{
+  height:100%;
+  width:0%;
+  background: rgba(255,45,85,.95);
+  box-shadow: 0 0 18px rgba(255,45,85,.20);
+  border-radius:999px;
+  animation: fill 1.2s ease forwards;
+}
+
+.loaderTip{
+  margin-top:12px;
+  color:rgba(255,255,255,.65);
+  font-size:12px;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+@keyframes fill{
+  0%{width:0%}
+  100%{width:100%}
+}
+
+@keyframes glitch{
+  0%, 100%{transform:translate(0,0)}
+  10%{transform:translate(1px,-1px)}
+  20%{transform:translate(-1px,1px)}
+  30%{transform:translate(1px,1px)}
+  40%{transform:translate(-1px,-1px)}
+  50%{transform:translate(2px,0)}
+  60%{transform:translate(-2px,0)}
+  70%{transform:translate(0,1px)}
+  80%{transform:translate(0,-1px)}
+  90%{transform:translate(1px,0)}
+}
+
+/* =========================
+   LOADER UPGRADE: % + SCAN
+   ========================= */
+
+/* línea scan estilo hacker */
+.loaderScan{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  border-radius:20px;
+}
+
+.loaderScan::before{
+  content:"";
+  position:absolute;
+  left:-40%;
+  top:-20%;
+  width:60%;
+  height:160%;
+  background: linear-gradient(
+    90deg,
+    rgba(255,45,85,0) 0%,
+    rgba(255,45,85,.25) 35%,
+    rgba(255,45,85,.55) 50%,
+    rgba(255,45,85,.25) 65%,
+    rgba(255,45,85,0) 100%
+  );
+  filter: blur(1px);
+  transform: rotate(10deg);
+  animation: scanMove 1.35s linear infinite;
+  opacity:.55;
+}
+
+@keyframes scanMove{
+  0%{transform:translateX(-60%) rotate(10deg)}
+  100%{transform:translateX(220%) rotate(10deg)}
+}
+
+/* texto del porcentaje */
+.loaderPct{
+  margin-top:10px;
+  font-size:14px;
+  letter-spacing:2px;
+  font-weight:900;
+  color:rgba(255,255,255,.88);
+  text-shadow: 0 0 16px rgba(255,45,85,.35);
+}
+
+/* mini glow de “cargando” */
+.loaderPulse{
+  display:inline-block;
+  animation: pulseGlow 1.2s ease-in-out infinite;
+}
+
+@keyframes pulseGlow{
+  0%,100%{opacity:.75}
+  50%{opacity:1}
+}
+
+/* =========================
+   DEVICE CHECK (Loader)
+   ========================= */
+.devCheck{
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,45,85,.22);
+  background: rgba(10,12,25,.52);
+  box-shadow: inset 0 0 18px rgba(255,45,85,.08);
+  text-align:left;
+}
+
+.devTitle{
+  font-size:12px;
+  letter-spacing:2px;
+  font-weight:900;
+  color: rgba(255,255,255,.82);
+  margin-bottom:8px;
+}
+
+.devList{
+  font-size:11px;
+  line-height:1.35;
+  color: rgba(255,255,255,.70);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.devItem{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:4px 0;
+  border-bottom: 1px dashed rgba(255,45,85,.12);
+}
+.devItem:last-child{border-bottom:none;}
+
+.devKey{
+  opacity:.85;
+}
+
+.devVal{
+  font-weight:800;
+  color: rgba(255,255,255,.88);
+  text-shadow: 0 0 12px rgba(255,45,85,.20);
+}
+.devOk{
+  color: rgba(64,255,128,.90);
+  text-shadow: 0 0 10px rgba(64,255,128,.20);
+}
+.devWarn{
+  color: rgba(255,210,64,.92);
+}
+
+  </style>
+</head>
+
+<body>
+  
+  <!-- LOADER BRAKO -->
+<div id="loader" class="loader">
+  <div class="loaderBox">
+    <div class="loaderTitle">BRAKO</div>
+    <div class="loaderSub">CARGANDO SISTEMA...</div>
+
+    <div class="loaderRing"></div>
+
+    <div class="loaderBar">
+      <div class="loaderFill"></div>
+    </div>
+
+    <div class="loaderTip"><span class="loaderPulse">Optimizando sensibilidad y táctil...</span></div>
+<div class="loaderPct" id="loaderPct">0%</div>
+  
+  <div class="devCheck" id="devCheck">
+  <div class="devTitle">Verificando dispositivo...</div>
+  <div class="devList" id="devList"></div>
+</div>
+
+<div class="loaderScan"></div>
+  </div>
+</div>
+  
+  <canvas id="fx"></canvas>
+
+  <div class="wrap">
+    <div class="brand">BRAKO</div>
+    <div class="sub">SISTEMA</div>
+
+    <div class="tabs">
+      <button class="tab active" id="tabGen">Generador</button>
+      <button class="tab" id="tabCal">Calibrador</button>
+    </div>
+
+    <!-- GENERADOR -->
+    <section id="gen">
+      <div class="panel">
+        <div class="title">Generador (0–200) + DPI</div>
+
+        <div class="grid">
+          <div>
+            <label>Estilo</label>
+            <select id="style">
+              <option value="estable" selected>Estable (Pegado)</option>
+              <option value="preciso">Preciso (Control)</option>
+              <option value="rapido">Rápido (Agresivo)</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Marca</label>
+            <select id="brand"></select>
+          </div>
+
+          <div>
+            <label>Modelo</label>
+            <select id="model"></select>
+          </div>
+
+          <div>
+            <label>Hz de pantalla (auto)</label>
+            <select id="hz">
+              <option value="60">60 Hz</option>
+              <option value="90">90 Hz</option>
+              <option value="120">120 Hz</option>
+              <option value="144">144 Hz</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Dedos</label>
+            <select id="fingers">
+              <option value="2">2 Dedos</option>
+              <option value="3" selected>3 Dedos</option>
+              <option value="4">4 Dedos</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Modo de juego</label>
+            <select id="mode">
+              <option value="normal" selected>Normal</option>
+              <option value="performance">Rendimiento</option>
+              <option value="battery">Ahorro batería</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn" id="btnGen">GENERAR CONFIGURACIÓN</button>
+
+        <div class="pill">
+          <span class="dot"></span>
+          <span id="autoHint">El Hz y el DPI se ajustan según el modelo.</span>
+        </div>
+
+        <div class="hint">
+          Config basada en presets + reglas reales (sin valores random). Todo dentro de 0–200.
+        </div>
+      </div>
+
+      <div id="resultPanel" class="panel hidden">
+        <div class="title">Resultado (Free Fire)</div>
+        <div class="result-grid" id="kv"></div>
+
+        <div class="actions">
+          <button class="btn alt" id="btnCopyFF">COPIAR CONFIG FF</button>
+          <button class="btn green" id="btnWhats">COMPARTIR WHATSAPP</button>
+        </div>
+
+        <div class="hint" id="ffNote"></div>
+      </div>
+    </section>
+
+    <!-- CALIBRADOR -->
+    <section id="cal" class="hidden">
+
+      <div class="panel">
+        <div class="title">Test 1: Reacción (ms)</div>
+        <div id="reactionTap" class="bigTap">Toca "INICIAR"</div>
+        <div style="margin-top:12px">
+          <button class="btn" id="btnReact">INICIAR TEST DE REACCIÓN</button>
+        </div>
+        <div class="hint" style="margin-top:10px">
+          Espera a que diga "TOCA YA". Si tocas antes, se reinicia.
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="title">Test 2: Estabilidad (3s)</div>
+        <div id="stage" class="stage">
+          <div id="target" class="target"></div>
+        </div>
+        <div style="margin-top:12px">
+          <button class="btn" id="btnStab">INICIAR TEST DE ESTABILIDAD</button>
+        </div>
+        <div class="hint" id="stabHint" style="margin-top:10px">
+          Mantén el dedo dentro del círculo por 3 segundos.
+        </div>
+      </div>
+
+      <div id="recPanel" class="panel hidden">
+        <div class="title">Recomendación (Personalizada)</div>
+        <pre id="recText"></pre>
+
+        <div class="actions">
+          <button class="btn alt" id="btnCopyCmd">COPIAR COMANDOS</button>
+          <button class="btn" id="btnCopyAll">COPIAR TODO</button>
+        </div>
+
+        <div class="hint">
+          Nota: SetEdit/ADB depende del dispositivo. Por eso se entregan 3 niveles (Seguro / Probable / Experimental).
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div id="toast" class="toast">Copiado ✅</div>
+
+<script>
+  
+  /* =========================
+   LOADER BRAKO PRO (4/4)
+   % real + sonido + scan
+   ========================= */
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loader");
+  const pctEl = document.getElementById("loaderPct");
+
+  if(!loader) return;              // ✅ primero esto
+  setTimeout(runDeviceCheck, 60);  // ✅ después esto
+
+
+  // 1) Tiempo total del loader (ms)
+  const LOADER_TIME = 2800;
+
+  // 2) SONIDO BOOT (opcional)
+  // Nota: Algunos navegadores bloquean autoplay hasta que toques la pantalla.
+  // Igual lo intentamos y si no, se reproduce cuando el user toque.
+  const boot = new Audio();
+  boot.src = "data:audio/wav;base64,UklGRmQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YUcAAAAA/////wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///wAAAP///w==";
+  boot.volume = 0.45;
+
+  const tryPlay = () => {
+    boot.play().catch(()=>{});
+    window.removeEventListener("pointerdown", tryPlay);
+  };
+
+  // intento automático
+  boot.play().catch(()=> {
+    // si lo bloquea, lo reproducimos al primer toque
+    window.addEventListener("pointerdown", tryPlay, {once:true});
+  });
+
+  // 3) Porcentaje real (simulado pero PRO)
+  // (crece según tiempo y se completa al final)
+  let start = performance.now();
+  let rafId = 0;
+
+  const tick = (t) => {
+    const elapsed = t - start;
+    let p = Math.min(100, Math.floor((elapsed / LOADER_TIME) * 100));
+    if(pctEl) pctEl.textContent = p + "%";
+    if(p < 100) rafId = requestAnimationFrame(tick);
+  };
+  rafId = requestAnimationFrame(tick);
+
+  // 4) Ocultar loader al final
+  setTimeout(() => {
+    cancelAnimationFrame(rafId);
+    if(pctEl) pctEl.textContent = "100%";
+    loader.classList.add("hide");
+    setTimeout(() => loader.remove(), 450);
+  }, LOADER_TIME);
+});
+  
+
+/* =========================
+   DEVICE CHECK (real)
+   ========================= */
+async function runDeviceCheck(){
+  const listEl = document.getElementById("devList");
+  if(!listEl) return;
+
+  listEl.innerHTML = "";
+
+  const addLine = (text, cls="") => {
+    const div = document.createElement("div");
+    div.className = "devLine";
+    div.innerHTML = `<span class="${cls}">${text}</span><span class="devCursor">▌</span>`;
+    listEl.appendChild(div);
+    return div;
+  };
+
+  const finalizeLine = (line, text, cls="") => {
+    line.innerHTML = `<span class="${cls}">${text}</span>`;
+  };
+
+  const l1 = addLine("Detectando sistema...");
+  await new Promise(r=>setTimeout(r, 220));
+  const os = detectOS();
+  finalizeLine(l1, `Sistema: ${os}`, "devOk");
+
+  const l2 = addLine("Analizando marca...");
+  await new Promise(r=>setTimeout(r, 220));
+  const brand = detectBrand();
+  finalizeLine(l2, `Marca: ${brand}`, (brand==="No detectado") ? "devWarn" : "devOk");
+
+  const l3 = addLine("Leyendo pantalla...");
+  await new Promise(r=>setTimeout(r, 240));
+  const w = screen.width, h = screen.height;
+  const dpr = window.devicePixelRatio || 1;
+  finalizeLine(l3, `Pantalla: ${w}×${h}  DPR ${dpr}`, "devOk");
+
+  const l4 = addLine("Verificando touch...");
+  await new Promise(r=>setTimeout(r, 240));
+  const touchOk = canTouch();
+  finalizeLine(l4, `Touch: ${touchOk ? "OK ✅" : "NO ❌"}`, touchOk ? "devOk" : "devWarn");
+
+  const l5 = addLine("Analizando rendimiento...");
+  await new Promise(r=>setTimeout(r, 260));
+  const cores = navigator.hardwareConcurrency || "N/D";
+  const ram = navigator.deviceMemory || "N/D";
+  finalizeLine(l5, `CPU: ${cores} núcleos | RAM: ${ram} GB`, "devOk");
+
+  const l6 = addLine("Midiendo Hz reales...");
+  const hz = await measureRefreshRate(700);
+  finalizeLine(l6, `Hz estimados: ${hz} Hz`, hz>=55 ? "devOk" : "devWarn");
+
+  const l7 = addLine("Aplicando perfil táctil...");
+  await new Promise(r=>setTimeout(r, 260));
+
+  const perfOk = (cores==="N/D") ? true : (cores >= 4);
+  const hzOk = hz >= 55;
+
+  const ok = touchOk && perfOk && hzOk;
+  finalizeLine(l7, `Optimización: ${ok ? "LISTO ✅" : "LIMITADA ⚠️"}`, ok ? "devOk" : "devWarn");
+}
+
+
+function detectOS(){
+  const ua = navigator.userAgent || "";
+  if(/Android/i.test(ua)) return "Android";
+  if(/iPhone|iPad|iPod/i.test(ua)) return "iOS";
+  if(/Windows/i.test(ua)) return "Windows";
+  if(/Mac OS X/i.test(ua)) return "Mac";
+  return "Otro";
+}
+
+function detectBrand(){
+  const ua = navigator.userAgent || "";
+  // no siempre sale la marca, pero intentamos
+  if(/Xiaomi|Redmi|POCO/i.test(ua)) return "Xiaomi/POCO";
+  if(/Samsung/i.test(ua)) return "Samsung";
+  if(/Infinix/i.test(ua)) return "Infinix";
+  if(/TECNO/i.test(ua)) return "TECNO";
+  if(/HUAWEI/i.test(ua)) return "Huawei";
+  if(/Motorola|Moto/i.test(ua)) return "Motorola";
+  if(/OPPO/i.test(ua)) return "OPPO";
+  if(/vivo/i.test(ua)) return "vivo";
+  if(/OnePlus/i.test(ua)) return "OnePlus";
+  if(/iPhone|iPad/i.test(ua)) return "Apple";
+  return "No detectado";
+}
+
+function canTouch(){
+  return ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+}
+
+function fmt(x){ return x ?? "N/D"; }
+
+async function runDeviceCheck(){
+  const listEl = document.getElementById("devList");
+  if(!listEl) return;
+
+  const os = detectOS();
+  const brand = detectBrand();
+  const w = window.screen.width;
+  const h = window.screen.height;
+  const dpr = window.devicePixelRatio || 1;
+
+  const cores = navigator.hardwareConcurrency || null;
+  const ram = navigator.deviceMemory || null;
+
+  let net = null;
+  try{
+    const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if(c && c.effectiveType) net = c.effectiveType.toUpperCase(); // 4g / 3g / wifi etc
+  }catch(e){}
+
+  // Medimos Hz reales aproximados
+  const hz = await measureRefreshRate(650);
+
+  // Señales para “apto”
+  const touchOk = canTouch();
+  const hzOk = hz >= 55; // mínimo 60 aprox
+  const perfOk = (cores ? cores >= 4 : true);
+
+  const items = [
+    ["Sistema", os],
+    ["Marca", brand],
+    ["Pantalla", `${w}×${h}  DPR ${dpr}`],
+    ["Hz estimados", `${hz} Hz`],
+    ["Touch", touchOk ? "OK" : "NO"],
+    ["CPU (núcleos)", fmt(cores)],
+    ["RAM (GB)", fmt(ram)],
+    ["Red", fmt(net)],
+    ["Optimización", (touchOk && hzOk && perfOk) ? "LISTO ✅" : "LIMITADA ⚠️"]
+  ];
+
+  // Render
+  listEl.innerHTML = "";
+  items.forEach(([k,v])=>{
+    const row = document.createElement("div");
+    row.className = "devItem";
+
+    const key = document.createElement("div");
+    key.className = "devKey";
+    key.textContent = k;
+
+    const val = document.createElement("div");
+    val.className = "devVal";
+    val.textContent = v;
+
+    if(v === "OK" || String(v).includes("LISTO")) val.classList.add("devOk");
+    if(String(v).includes("LIMITADA")) val.classList.add("devWarn");
+
+    row.appendChild(key);
+    row.appendChild(val);
+    listEl.appendChild(row);
+  });
+}
+  
+/* =========================================================
+   BRAKO - SISTEMA (Single-file HTML)
+   - Generador de config FF (0-200) + DPI + Fire Button (0-200)
+   - Calibrador: reacción + estabilidad
+   - Recomendación: perfil + config ajustada + comandos SetEdit/ADB (3 niveles)
+   - LocalStorage + WhatsApp share
+   ========================================================= */
+
+(() => {
+  // ---------- Helpers ----------
+  const $ = (id)=>document.getElementById(id);
+  const clamp = (v,min=0,max=200)=>Math.max(min, Math.min(max, v));
+  const clampInt = (v,min,max)=>Math.round(Math.max(min, Math.min(max, v)));
+  const toast = (msg)=>{
+    const el=$("toast");
+    if(!el) return;
+    el.textContent=msg;
+    el.classList.add("show");
+    setTimeout(()=>el.classList.remove("show"), 900);
+  };
+  const copyText = async (text)=>{
+    try{
+      await navigator.clipboard.writeText(text);
+      toast("Copiado ✅");
+      return true;
+    }catch(e){
+      // fallback
+      const ta=document.createElement("textarea");
+      ta.value=text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      toast("Copiado ✅");
+      return true;
+    }
+  };
+
+  // ---------- Tabs ----------
+  const tabGen=$("tabGen"), tabCal=$("tabCal");
+  const secGen=$("gen"), secCal=$("cal");
+  function showTab(which){
+    const gen = which==="gen";
+    tabGen.classList.toggle("active", gen);
+    tabCal.classList.toggle("active", !gen);
+    secGen.classList.toggle("hidden", !gen);
+    secCal.classList.toggle("hidden", gen);
+    localStorage.setItem("brako_tab", which);
+  }
+  tabGen.addEventListener("click", ()=>showTab("gen"));
+  tabCal.addEventListener("click", ()=>showTab("cal"));
+
+  // ---------- Device detection (light) ----------
+  function detectDevice(){
+    const ua = navigator.userAgent || "";
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+
+    let androidVer = null;
+    if(isAndroid){
+      const m = ua.match(/Android\s([0-9\.]+)/i);
+      androidVer = m ? m[1] : null;
+    }
+    let brandGuess = isAndroid ? "Android (genérico)" : isIOS ? "iOS" : "Otro";
+    if(/Samsung/i.test(ua)) brandGuess = "Samsung";
+    else if(/Xiaomi|Redmi|POCO/i.test(ua)) brandGuess = "Xiaomi/POCO/Redmi";
+    else if(/Huawei/i.test(ua)) brandGuess = "Huawei";
+    else if(/Realme/i.test(ua)) brandGuess = "Realme";
+    else if(/Motorola|Moto/i.test(ua)) brandGuess = "Motorola";
+    else if(/Infinix/i.test(ua)) brandGuess = "Infinix";
+    else if(/TECNO/i.test(ua)) brandGuess = "Tecno";
+    else if(/OnePlus/i.test(ua)) brandGuess = "OnePlus";
+    else if(/OPPO/i.test(ua)) brandGuess = "Oppo";
+    else if(/Vivo/i.test(ua)) brandGuess = "Vivo";
+
+    const width = window.screen?.width || 0;
+    const height = window.screen?.height || 0;
+    const dpr = window.devicePixelRatio || 1;
+
+    return {
+      ua,
+      isAndroid,
+      isIOS,
+      androidVer,
+      brandGuess,
+      screen: `${width}x${height}`,
+      dpr
+    };
+  }
+
+  // ---------- Models database ----------
+  // Each model: name, hzHint, dpi, power (1-5), baseAdjust
+  // baseAdjust used to nudge config by device behavior.
+  const DB = {
+    "Xiaomi / POCO / Redmi":[
+      {name:"POCO X3 Pro", hzHint:120, dpi:560, power:4, adj:{g:+2, rd:+3, x2:+2, x4:+1, awm:+1, fl:+2, btn:+2}},
+      {name:"POCO X3 NFC", hzHint:120, dpi:550, power:4, adj:{g:+1, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+2}},
+      {name:"POCO F3", hzHint:120, dpi:580, power:5, adj:{g:+2, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"POCO F4", hzHint:120, dpi:585, power:5, adj:{g:+2, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"POCO F5 / F5 Pro", hzHint:120, dpi:600, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"POCO X4 Pro", hzHint:120, dpi:560, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"POCO X5 / X5 Pro", hzHint:120, dpi:570, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Redmi Note 8 / 8 Pro", hzHint:60, dpi:500, power:3, adj:{g:0, rd:0, x2:+1, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Redmi Note 9", hzHint:60, dpi:500, power:3, adj:{g:0, rd:0, x2:+1, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Redmi Note 10 Pro", hzHint:120, dpi:550, power:4, adj:{g:+1, rd:+2, x2:+1, x4:+1, awm:+1, fl:+1, btn:+1}},
+      {name:"Redmi Note 11", hzHint:90, dpi:540, power:3, adj:{g:+1, rd:+1, x2:+1, x4:0, awm:0, fl:+1, btn:+1}},
+      {name:"Redmi Note 12", hzHint:120, dpi:560, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Redmi Note 12 Pro", hzHint:120, dpi:570, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Redmi Note 13", hzHint:120, dpi:575, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Redmi Note 13 Pro / Pro+", hzHint:120, dpi:590, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Mi 9T / K20", hzHint:60, dpi:520, power:4, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:+1, fl:+1, btn:+1}},
+      {name:"Mi 10 / 10T", hzHint:120, dpi:580, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Mi 11 / 11T", hzHint:120, dpi:585, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Otro Xiaomi/POCO/Redmi", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "Samsung":[
+      {name:"Galaxy A10 / A20 / A30", hzHint:60, dpi:480, power:2, adj:{g:-1, rd:-1, x2:0, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Galaxy A12", hzHint:60, dpi:500, power:2, adj:{g:-1, rd:-1, x2:0, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Galaxy A14", hzHint:90, dpi:520, power:3, adj:{g:+1, rd:+1, x2:+1, x4:0, awm:0, fl:+1, btn:+1}},
+      {name:"Galaxy A23 / A24", hzHint:90, dpi:530, power:3, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:0, fl:+1, btn:+1}},
+      {name:"Galaxy A34", hzHint:120, dpi:560, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Galaxy A54", hzHint:120, dpi:575, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Galaxy S10 / S20", hzHint:120, dpi:580, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Galaxy S21 / S22", hzHint:120, dpi:590, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Galaxy S23 / S24", hzHint:120, dpi:600, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Otro Samsung", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "Realme":[
+      {name:"Realme C11 / C12 / C15", hzHint:60, dpi:490, power:2, adj:{g:-1, rd:-1, x2:0, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Realme 7 / 8", hzHint:90, dpi:530, power:3, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:0, fl:+1, btn:+1}},
+      {name:"Realme 9 / 10", hzHint:90, dpi:540, power:3, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:+1, fl:+1, btn:+1}},
+      {name:"Realme GT", hzHint:120, dpi:590, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Otro Realme", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "Motorola":[
+      {name:"Moto E / E7 / E20", hzHint:60, dpi:480, power:2, adj:{g:-1, rd:-1, x2:0, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Moto G8 / G9", hzHint:60, dpi:500, power:3, adj:{g:0, rd:0, x2:+1, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Moto G10 / G20 / G30", hzHint:90, dpi:530, power:3, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:0, fl:+1, btn:+1}},
+      {name:"Moto G50 / G60", hzHint:120, dpi:560, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Otro Motorola", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "Huawei":[
+      {name:"Huawei Y7 / Y9", hzHint:60, dpi:480, power:2, adj:{g:-1, rd:-1, x2:0, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Huawei P20 / P30", hzHint:60, dpi:520, power:4, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:+1, fl:+1, btn:+1}},
+      {name:"Huawei Nova", hzHint:90, dpi:540, power:4, adj:{g:+1, rd:+1, x2:+2, x4:+1, awm:+1, fl:+1, btn:+1}},
+      {name:"Otro Huawei", hzHint:60, dpi:510, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "Infinix":[
+      {name:"Infinix Hot 10/11/12", hzHint:60, dpi:500, power:3, adj:{g:0, rd:0, x2:+1, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Infinix Note 10/11/12", hzHint:90, dpi:540, power:3, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:0, fl:+1, btn:+1}},
+      {name:"Infinix Zero", hzHint:120, dpi:560, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Otro Infinix", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "Tecno":[
+      {name:"Tecno Spark", hzHint:60, dpi:490, power:3, adj:{g:0, rd:0, x2:+1, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Tecno Pova", hzHint:90, dpi:540, power:3, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:0, fl:+1, btn:+1}},
+      {name:"Tecno Camon", hzHint:90, dpi:540, power:3, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:0, fl:+1, btn:+1}},
+      {name:"Otro Tecno", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "OnePlus":[
+      {name:"OnePlus 7 / 8", hzHint:90, dpi:570, power:5, adj:{g:+2, rd:+2, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"OnePlus 9 / 10 / 11", hzHint:120, dpi:600, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Otro OnePlus", hzHint:90, dpi:560, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+    ],
+
+    "Oppo":[
+      {name:"Oppo A15 / A16", hzHint:60, dpi:500, power:3, adj:{g:0, rd:0, x2:+1, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Oppo A54 / A74", hzHint:90, dpi:540, power:3, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:0, fl:+1, btn:+1}},
+      {name:"Oppo Reno", hzHint:120, dpi:575, power:4, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"Otro Oppo", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "Vivo":[
+      {name:"Vivo Y / V", hzHint:60, dpi:510, power:3, adj:{g:0, rd:0, x2:+1, x4:0, awm:0, fl:+1, btn:+2}},
+      {name:"Vivo iQOO", hzHint:120, dpi:590, power:5, adj:{g:+3, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Otro Vivo", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+
+    "iPhone":[
+      {name:"iPhone 7 / 8", hzHint:60, dpi:520, power:4, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:+1, fl:+1, btn:+1}},
+      {name:"iPhone X / XR / 11", hzHint:60, dpi:540, power:5, adj:{g:+1, rd:+2, x2:+2, x4:+1, awm:+1, fl:+1, btn:+1}},
+      {name:"iPhone 12 / 13", hzHint:60, dpi:560, power:5, adj:{g:+2, rd:+2, x2:+2, x4:+1, awm:+1, fl:+2, btn:+1}},
+      {name:"iPhone 13 Pro / 14 Pro / 15 Pro", hzHint:120, dpi:580, power:5, adj:{g:+2, rd:+3, x2:+3, x4:+2, awm:+2, fl:+2, btn:+1}},
+      {name:"Otro iPhone", hzHint:60, dpi:560, power:5, adj:{g:+1, rd:+1, x2:+1, x4:+1, awm:+1, fl:+1, btn:+1}},
+    ],
+
+    "Otro":[
+      {name:"Genérico (Otro)", hzHint:60, dpi:520, power:3, adj:{g:0, rd:0, x2:0, x4:0, awm:0, fl:0, btn:0}},
+    ],
+  };
+
+  // ---------- Populate brand/model ----------
+  const brandSel=$("brand");
+  const modelSel=$("model");
+
+  function populateBrands(){
+    brandSel.innerHTML="";
+    Object.keys(DB).forEach((b)=>{
+      const opt=document.createElement("option");
+      opt.value=b; opt.textContent=b;
+      brandSel.appendChild(opt);
+    });
+  }
+
+  function populateModels(){
+    const b = brandSel.value;
+    const list = DB[b] || DB["Otro"];
+    modelSel.innerHTML="";
+    list.forEach((m, idx)=>{
+      const opt=document.createElement("option");
+      opt.value=idx;
+      opt.textContent=m.name;
+      modelSel.appendChild(opt);
+    });
+  }
+
+  function currentModel(){
+    const b = brandSel.value;
+    const list = DB[b] || DB["Otro"];
+    const idx = parseInt(modelSel.value||"0",10);
+    return list[idx] || list[0];
+  }
+
+  function applyAutoHz(){
+    const m = currentModel();
+    const hz = m.hzHint || 60;
+    const hzSel=$("hz");
+    const allowed = ["60","90","120","144"];
+    if(allowed.includes(String(hz))){
+      hzSel.value = String(hz);
+    }else{
+      hzSel.value = "60";
+    }
+  }
+
+  // ---------- Config generation ----------
+  function baseByStyle(style){
+    // sensible base within 0-200
+    // g=general rd=redDot x2 x4 awm fl=freelook btn=fire button %
+    if(style==="rapido"){
+      return {g:108, rd:105, x2:98, x4:92, awm:88, fl:110, btn:55};
+    }
+    if(style==="preciso"){
+      return {g:98, rd:96, x2:92, x4:86, awm:82, fl:102, btn:58};
+    }
+    return {g:104, rd:102, x2:95, x4:89, awm:85, fl:108, btn:56}; // estable
+  }
+
+  function adjustByHz(vals, hz){
+    const h = parseInt(hz,10);
+    // Higher Hz feels faster, so slightly reduce high-sensitivity to maintain control.
+    if(h>=120){
+      vals.g -= 1; vals.rd -= 1; vals.x2 -= 1;
+      vals.fl += 1;
+    }else if(h>=90){
+      vals.g += 0; vals.rd += 0; vals.fl += 0;
+    }else{
+      // 60hz: needs a little more for responsiveness
+      vals.g += 2; vals.rd += 2; vals.fl += 1;
+    }
+    return vals;
+  }
+
+  function adjustByFingers(vals, fingers){
+    const f = parseInt(fingers,10);
+    // More fingers = more control -> can increase slightly
+    if(f===4){ vals.g += 2; vals.rd += 2; vals.btn -= 2; }
+    if(f===2){ vals.g -= 1; vals.rd -= 1; vals.btn += 2; }
+    return vals;
+  }
+
+  function adjustByMode(vals, mode){
+    if(mode==="performance"){ vals.fl += 1; vals.btn -= 1; }
+    if(mode==="battery"){ vals.g -= 1; vals.rd -= 1; vals.btn += 2; }
+    return vals;
+  }
+
+  function generateConfig({style, brand, modelIdx, hz, fingers, mode}){
+    const model = currentModel();
+    const base = baseByStyle(style);
+    const adj = model.adj || {g:0,rd:0,x2:0,x4:0,awm:0,fl:0,btn:0};
+
+    let vals = {
+      g: base.g + adj.g,
+      rd: base.rd + adj.rd,
+      x2: base.x2 + adj.x2,
+      x4: base.x4 + adj.x4,
+      awm: base.awm + adj.awm,
+      fl: base.fl + adj.fl,
+      btn: base.btn + adj.btn
+    };
+
+    vals = adjustByHz(vals, hz);
+    vals = adjustByFingers(vals, fingers);
+    vals = adjustByMode(vals, mode);
+
+    // DPI recommended base on model + slight by style
+    let dpi = model.dpi || 520;
+    if(style==="rapido") dpi += 20;
+    if(style==="preciso") dpi -= 10;
+
+    // make sure within realistic range
+    dpi = clampInt(dpi, 420, 680);
+
+    // clamp sensitivities 0-200 and button 0-200
+    const out = {
+      dpi,
+      general: clamp(vals.g),
+      redDot: clamp(vals.rd),
+      x2: clamp(vals.x2),
+      x4: clamp(vals.x4),
+      awm: clamp(vals.awm),
+      freeLook: clamp(vals.fl),
+      fireBtn: clamp(vals.btn, 0, 200),
+    };
+
+    return { out, model };
+  }
+
+  function renderResult(out, model){
+    const kv=$("kv");
+    kv.innerHTML="";
+    const entries = [
+      ["DPI recomendado", out.dpi],
+      ["General", out.general],
+      ["Red Dot", out.redDot],
+      ["2x", out.x2],
+      ["4x", out.x4],
+      ["AWM", out.awm],
+      ["Free Look", out.freeLook],
+      ["Botón Disparo (%)", out.fireBtn],
+    ];
+    entries.forEach(([k,v])=>{
+      const row=document.createElement("div");
+      row.className="kv";
+      row.innerHTML=`<b>${k}</b><span>${v}</span>`;
+      kv.appendChild(row);
+    });
+
+    $("resultPanel").classList.remove("hidden");
+    $("ffNote").textContent = `Modelo detectado: ${model.name} | Hz sugerido: ${model.hzHint} Hz | Perfil base: ${$("style").selectedOptions[0].textContent}`;
+  }
+
+  function formatFFText(out){
+    return [
+      "✅ BRAKO - CONFIG FREE FIRE",
+      "",
+      `DPI: ${out.dpi}`,
+      `General: ${out.general}`,
+      `Red Dot: ${out.redDot}`,
+      `2x: ${out.x2}`,
+      `4x: ${out.x4}`,
+      `AWM: ${out.awm}`,
+      `Free Look: ${out.freeLook}`,
+      `Botón Disparo: ${out.fireBtn}%`,
+      "",
+      "⚠️ Nota: Ajusta 1-3 puntos si sientes aceleración o desliz.",
+    ].join("\n");
+  }
+
+  // ---------- LocalStorage ----------
+  const LS_KEY="brako_state_v1";
+  function saveState(){
+    const state = {
+      tab: secCal.classList.contains("hidden") ? "gen":"cal",
+      style: $("style").value,
+      brand: brandSel.value,
+      model: modelSel.value,
+      hz: $("hz").value,
+      fingers: $("fingers").value,
+      mode: $("mode").value
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  }
+  function loadState(){
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return;
+    try{
+      const s=JSON.parse(raw);
+      if(s.style) $("style").value=s.style;
+      if(s.brand) brandSel.value=s.brand;
+      populateModels();
+      if(s.model!=null) modelSel.value=s.model;
+      if(s.hz) $("hz").value=s.hz;
+      if(s.fingers) $("fingers").value=s.fingers;
+      if(s.mode) $("mode").value=s.mode;
+      if(s.tab) showTab(s.tab);
+    }catch(e){}
+  }
+
+  // ---------- Universal recommendation + SetEdit/ADB generator ----------
+  let lastReactionMs=null;
+  let lastStabilityScore=null;
+  let lastFF=null; // store latest generator output
+  let lastRecText="";
+
+  function buildProfile(reactionMs, stabilityScore){
+    let pointerSpeed = 1;
+    let profile = "Balanceado";
+
+    // Reaction mapping
+    if(reactionMs > 380){ pointerSpeed = 3; profile="Rápido"; }
+    else if(reactionMs < 240){ pointerSpeed = 0; profile="Preciso"; }
+    else { pointerSpeed = 1; profile="Balanceado"; }
+
+    // Stability effect
+    if(stabilityScore < 55){
+      pointerSpeed -= 1;
+      profile = "Estable";
+    }
+    if(stabilityScore > 86 && reactionMs < 270){
+      profile = "Pro";
+    }
+    pointerSpeed = clampInt(pointerSpeed, -7, 7);
+
+    // Hz suggestion (not guaranteed)
+    let hzSuggestion = 60;
+    if(stabilityScore > 70) hzSuggestion = 90;
+    if(stabilityScore > 82 && reactionMs < 290) hzSuggestion = 120;
+
+    // A small "touch tune" based on stability
+    // lower stability -> reduce sens; high stability -> slightly higher
+    let tune = 0;
+    if(stabilityScore < 55) tune = -3;
+    else if(stabilityScore < 70) tune = -1;
+    else if(stabilityScore > 86) tune = +2;
+    else tune = +1;
+
+    return { profile, pointerSpeed, hzSuggestion, tune };
+  }
+
+  function commandsSafe(profile){
+    return [
+      "# ✅ SETEDIT SEGURO (alta compatibilidad)",
+      "settings put global window_animation_scale 0.0",
+      "settings put global transition_animation_scale 0.0",
+      "settings put global animator_duration_scale 0.0",
+      `settings put system pointer_speed ${profile.pointerSpeed}`,
+    ].join("\n");
+  }
+  function commandsProbable(profile){
+    return [
+      "# ✅ SETEDIT PROBABLE (funciona en muchos)",
+      "# (Si alguno da error, tu sistema no lo soporta)",
+      "settings put secure long_press_timeout 180",
+      "settings put secure multi_press_timeout 180",
+      "settings put secure show_touches 0",
+    ].join("\n");
+  }
+  function commandsExperimental(profile){
+    return [
+      "# ⚡ EXPERIMENTAL (solo algunos Xiaomi/Samsung/ROMs)",
+      "# Si no cambia nada, tu ROM lo ignora",
+      `settings put system peak_refresh_rate ${profile.hzSuggestion}`,
+      `settings put system min_refresh_rate ${profile.hzSuggestion}`,
+      `settings put system user_refresh_rate ${profile.hzSuggestion}`,
+    ].join("\n");
+  }
+
+  function adjustFFByTests(ffOut, tune){
+    // tune applies mainly to General/RedDot/2x/FreeLook
+    const o = {...ffOut};
+    o.general = clamp(o.general + tune);
+    o.redDot  = clamp(o.redDot + tune);
+    o.x2      = clamp(o.x2 + Math.round(tune/2));
+    o.freeLook= clamp(o.freeLook + tune);
+    // stability low -> slightly smaller fire button for control
+    if(tune < 0) o.fireBtn = clamp(o.fireBtn - 2);
+    if(tune > 0) o.fireBtn = clamp(o.fireBtn + 1);
+    return o;
+  }
+
+  function showRecommendation(){
+    if(lastReactionMs==null || lastStabilityScore==null) return;
+
+    const dev = detectDevice();
+    const profile = buildProfile(lastReactionMs, lastStabilityScore);
+
+    // Build adjusted FF based on current selections
+    const gen = generateConfig({
+      style:$("style").value,
+      brand:brandSel.value,
+      modelIdx:modelSel.value,
+      hz:$("hz").value,
+      fingers:$("fingers").value,
+      mode:$("mode").value
+    });
+    const ffAdjusted = adjustFFByTests(gen.out, profile.tune);
+
+    const text =
+`✅ BRAKO - Perfil Personalizado (por tus tests)
+
+📱 Dispositivo detectado:
+- Sistema: ${dev.isAndroid ? "Android" : dev.isIOS ? "iOS" : "Otro"}
+- Versión: ${dev.androidVer || "No disponible"}
+- Marca estimada: ${dev.brandGuess}
+- Pantalla: ${dev.screen}  (DPR ${dev.dpr})
+
+🎯 Resultados:
+- Reacción: ${lastReactionMs} ms
+- Estabilidad: ${lastStabilityScore}/100
+- Perfil: ${profile.profile}
+
+🎮 CONFIG FREE FIRE (ajustada por tu calibración):
+- DPI: ${ffAdjusted.dpi}
+- General: ${ffAdjusted.general}
+- Red Dot: ${ffAdjusted.redDot}
+- 2x: ${ffAdjusted.x2}
+- 4x: ${ffAdjusted.x4}
+- AWM: ${ffAdjusted.awm}
+- Free Look: ${ffAdjusted.freeLook}
+- Botón Disparo: ${ffAdjusted.fireBtn}%
+
+🛠️ COMANDOS (SetEdit / ADB) - Copiar y pegar:
+
+${commandsSafe(profile)}
+
+${commandsProbable(profile)}
+
+${commandsExperimental(profile)}
+
+⚠️ Nota real:
+El navegador no puede saber qué "settings" exactos soporta tu Android.
+Si un comando da error o no cambia nada, tu ROM no lo soporta y no pasa nada.
+`.trim();
+
+    $("recPanel").classList.remove("hidden");
+    $("recText").textContent = text;
+    lastRecText = text;
+    saveState();
+  }
+
+  // ---------- Events: brand/model ----------
+  populateBrands();
+  brandSel.addEventListener("change", ()=>{
+    populateModels();
+    applyAutoHz();
+    saveState();
+  });
+  modelSel.addEventListener("change", ()=>{
+    applyAutoHz();
+    saveState();
+  });
+
+  $("style").addEventListener("change", saveState);
+  $("hz").addEventListener("change", saveState);
+  $("fingers").addEventListener("change", saveState);
+  $("mode").addEventListener("change", saveState);
+
+  populateModels();
+  applyAutoHz();
+
+  // Load state last
+  loadState();
+  populateModels();
+  applyAutoHz();
+
+  // Tab from storage if exists
+  const tabSaved = localStorage.getItem("brako_tab");
+  if(tabSaved) showTab(tabSaved);
+
+  // ---------- Generate button ----------
+  $("btnGen").addEventListener("click", ()=>{
+    const gen = generateConfig({
+      style:$("style").value,
+      brand:brandSel.value,
+      modelIdx:modelSel.value,
+      hz:$("hz").value,
+      fingers:$("fingers").value,
+      mode:$("mode").value
+    });
+    lastFF = gen.out;
+    renderResult(gen.out, gen.model);
+    saveState();
+    toast("Generado ✅");
+  });
+
+  $("btnCopyFF").addEventListener("click", ()=>{
+    if(!lastFF){
+      toast("Primero genera ✅");
+      return;
+    }
+    copyText(formatFFText(lastFF));
+  });
+
+  $("btnWhats").addEventListener("click", ()=>{
+    if(!lastFF){
+      toast("Primero genera ✅");
+      return;
+    }
+    const msg = encodeURIComponent(formatFFText(lastFF));
+    const url = `https://wa.me/?text=${msg}`;
+    window.open(url, "_blank");
+  });
+
+  // ---------- Copy commands / all ----------
+  $("btnCopyCmd").addEventListener("click", ()=>{
+    if(!lastRecText){ toast("Haz los tests ✅"); return; }
+    // Extract only commands block by removing header parts
+    // simple approach: copy whole recommendation
+    copyText(lastRecText);
+  });
+  $("btnCopyAll").addEventListener("click", ()=>{
+    if(!lastRecText){ toast("Haz los tests ✅"); return; }
+    copyText(lastRecText);
+  });
+
+  // ======================================================
+  // CALIBRADOR
+  // ======================================================
+
+  // ---- Test 1: Reaction ----
+  const reactionTap = $("reactionTap");
+  const btnReact = $("btnReact");
+
+  let reactState = "idle"; // idle | waiting | go
+  let reactTimeout = null;
+  let reactStart = 0;
+
+  function resetReact(text='Toca "INICIAR"'){
+    reactState="idle";
+    if(reactTimeout) clearTimeout(reactTimeout);
+    reactTimeout=null;
+    reactStart=0;
+    reactionTap.textContent=text;
+  }
+
+  function startReact(){
+    reactState="waiting";
+    reactionTap.textContent="Espera...";
+    const delay = Math.floor(1500 + Math.random()*2500);
+    reactTimeout=setTimeout(()=>{
+      reactState="go";
+      reactStart=performance.now();
+      reactionTap.textContent="¡TOCA YA!";
+    }, delay);
+  }
+
+  function pressReact(e){
+    e.preventDefault();
+
+    if(reactState==="idle"){
+      startReact();
+      toast("Listo ✅");
+      return;
+    }
+    if(reactState==="waiting"){
+      resetReact("Muy rápido 😅 Reiniciado");
+      toast("Muy rápido");
+      setTimeout(()=>resetReact(), 900);
+      return;
+    }
+    if(reactState==="go"){
+      const ms = performance.now() - reactStart;
+      lastReactionMs = Math.round(ms);
+      resetReact(`Tu reacción: ${lastReactionMs} ms ✅`);
+      toast("Medido ✅");
+      showRecommendation();
+      return;
+    }
+  }
+
+  btnReact.addEventListener("pointerdown", pressReact, {passive:false});
+  reactionTap.addEventListener("pointerdown", pressReact, {passive:false});
+
+  // ---- Test 2: Stability ----
+  const stage = $("stage");
+  const target = $("target");
+  const btnStab = $("btnStab");
+  const stabHint = $("stabHint");
+
+  let stabRunning=false;
+  let stabHoldStart=0;
+  let stabFails=0;
+  let stabTimer=null;
+  let stabStartSession=0;
+
+  function setStabHint(msg){ stabHint.textContent=msg; }
+
+  function randomTargetPos(){
+    const s=stage.getBoundingClientRect();
+    const t=target.getBoundingClientRect();
+
+    const maxX = s.width - t.width;
+    const maxY = s.height - t.height;
+
+    const x = Math.max(0, Math.random()*maxX);
+    const y = Math.max(0, Math.random()*maxY);
+
+    target.style.left = x + "px";
+    target.style.top  = y + "px";
+  }
+
+  function insideTarget(px,py){
+    const r=target.getBoundingClientRect();
+    const cx=r.left + r.width/2;
+    const cy=r.top  + r.height/2;
+    const rad=r.width/2;
+
+    const dx=px-cx, dy=py-cy;
+    return (dx*dx + dy*dy) <= (rad*rad);
+  }
+
+  function scoreStability(secondsHeld, fails){
+    let score = 100;
+    score -= fails * 18;
+    score -= Math.max(0, (3 - secondsHeld)) * 25;
+    return clampInt(score, 0, 100);
+  }
+
+  function stopStab(final=false, msg="Detenido"){
+    stabRunning=false;
+    stabHoldStart=0;
+    if(stabTimer) clearInterval(stabTimer);
+    stabTimer=null;
+
+    if(final){
+      toast("Resultado ✅");
+    }else{
+      toast(msg);
+    }
+  }
+
+  function startStab(){
+    stopStab(false, "Iniciando...");
+    stabRunning=true;
+    stabHoldStart=0;
+    stabFails=0;
+    stabStartSession=performance.now();
+
+    randomTargetPos();
+    setStabHint("Mantén el dedo dentro del círculo 3s...");
+
+    stabTimer=setInterval(()=>{
+      if(!stabRunning) return;
+
+      if(stabHoldStart > 0){
+        const elapsed = (performance.now() - stabHoldStart)/1000;
+        const left = Math.max(0, 3 - elapsed);
+        setStabHint(`Sostén... ${left.toFixed(1)}s`);
+
+        if(elapsed >= 3){
+          // compute stability
+          const totalHeld = 3; // achieved
+          lastStabilityScore = scoreStability(totalHeld, stabFails);
+          setStabHint(`¡Perfecto! Estabilidad: ${lastStabilityScore}/100 ✅`);
+          stopStab(true, "Bien");
+          showRecommendation();
+        }
+      }
+    }, 60);
+  }
+
+  function stabDown(e){
+    if(!stabRunning) return;
+    e.preventDefault();
+    const p = e.touches ? e.touches[0] : e;
+
+    if(insideTarget(p.clientX, p.clientY)){
+      stabHoldStart = performance.now();
+      setStabHint("Bien ✅ Mantén el dedo...");
+    }else{
+      stabHoldStart = 0;
+      stabFails++;
+      setStabHint("Toca dentro del círculo 👀");
+      // move a bit to make it fair
+      randomTargetPos();
+    }
+  }
+
+  function stabMove(e){
+    if(!stabRunning) return;
+    e.preventDefault();
+    if(stabHoldStart === 0) return;
+
+    const p = e.touches ? e.touches[0] : e;
+    if(!insideTarget(p.clientX, p.clientY)){
+      stabHoldStart = 0;
+      stabFails++;
+      setStabHint("Te saliste 😅 Intenta de nuevo...");
+      randomTargetPos();
+    }
+  }
+
+  function stabUp(e){
+    if(!stabRunning) return;
+    e.preventDefault();
+    if(stabHoldStart !== 0){
+      stabHoldStart = 0;
+      setStabHint("Soltaste. Vuelve a intentarlo.");
+    }
+  }
+
+  btnStab.addEventListener("pointerdown", (e)=>{ e.preventDefault(); startStab(); }, {passive:false});
+  stage.addEventListener("pointerdown", stabDown, {passive:false});
+  stage.addEventListener("pointermove", stabMove, {passive:false});
+  stage.addEventListener("pointerup", stabUp, {passive:false});
+  stage.addEventListener("pointercancel", stabUp, {passive:false});
+
+  // ======================================================
+  // PARTICLES (lightweight)
+  // ======================================================
+  const canvas = $("fx");
+  const ctx = canvas.getContext("2d");
+  let W=0,H=0, nodes=[];
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    nodes = new Array(55).fill(0).map(()=>({
+      x:Math.random()*W,
+      y:Math.random()*H,
+      vx:(Math.random()-.5)*.35,
+      vy:(Math.random()-.5)*.35,
+      r:Math.random()*1.6 + 0.6
+    }));
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  function step(){
+    ctx.clearRect(0,0,W,H);
+
+    // dots
+    for(const n of nodes){
+      n.x += n.vx; n.y += n.vy;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fillStyle="rgba(255,45,85,.35)";
+      ctx.fill();
+    }
+
+    // lines
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i], b=nodes[j];
+        const dx=a.x-b.x, dy=a.y-b.y;
+        const d=Math.hypot(dx,dy);
+        if(d<120){
+          const alpha = (1 - d/120)*0.12;
+          ctx.strokeStyle=`rgba(255,45,85,${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(a.x,a.y);
+          ctx.lineTo(b.x,b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+  step();
+
+})();
+</script>
+</body>
+</html>
