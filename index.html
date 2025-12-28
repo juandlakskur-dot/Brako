@@ -7,7 +7,7 @@
   <div class="onlineBox">
   <div class="onlineDot"></div>
   <div class="onlineText">
-    <b id="onlineCount">0</b> online ahora mismo
+    <b class="onlineNumber" id="onlineCount">0</b>
   </div>
   </div>
 
@@ -573,7 +573,7 @@
 
 <body>
   <div class="onlineText">
-  Online ahora: <b id="onlineCount">0</b>
+  Online ahora: <b class="onlineNumber">0</b>
   </div>
   
   <!-- LOADER BRAKO -->
@@ -1875,13 +1875,18 @@ Si un comando da error o no cambia nada, tu ROM no lo soporta y no pasa nada.
   // ✅ Al cerrar / perder conexión: borrar
   onDisconnect(myRef).remove();
 
-  // ✅ Contador en vivo
-  const countEl = document.getElementById("onlineCount");
-  onValue(onlineRoot, (snap)=>{
-    const data = snap.val() || {};
-    const count = Object.keys(data).length;
-    if(countEl) countEl.textContent = count;
+  // ✅ Contador en vivo (actualiza TODOS)
+function setOnlineUI(count){
+  document.querySelectorAll(".onlineNumber").forEach(el=>{
+    el.textContent = count;
   });
+}
+
+onValue(onlineRoot, (snap)=>{
+  const data = snap.val() || {};
+  const count = Object.keys(data).length;
+  setOnlineUI(count);
+});
   </script>
 </body>
 </html>
